@@ -44,7 +44,10 @@ obj/
 Doc/
 .vscode/
 .json
+*.kl
 
 *asm
 *cpu
 *.txt
+*.code
+
