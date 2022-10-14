@@ -5,15 +5,18 @@
 #include <sys/stat.h>
 #include <math.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "asm.h"
 #include "constants.h"
 
-#define error(_line, _mess, _type) printf("%s ERROR in line %ld: %s\n", _type, _line, _mess)
+#define error(_line, _mess, _type) if(!findErrors) printf("%s ERROR in line %ld: %s\n", _type, _line, _mess)
 
 #define CMD_LEN    50
 #define LABLE_SIZE 50
 #define LABLE_NUM  50
+
+size_t numstr = 0;
 
 typedef struct {
     long pos;
@@ -22,7 +25,7 @@ typedef struct {
 int lablecnt = 0;
 lable Lables[LABLE_NUM] = {0};
 
-long findLable (const char* name) {
+long findLable (const char* name, bool findErrors) {
     for (int i = 0; i < lablecnt; i++) {
         if (strcmp(Lables[i].name, name)) {
             return Lables[i].pos;
@@ -30,13 +33,13 @@ long findLable (const char* name) {
     }
     return -1;
 }
-void addLable  (long pos, const char* name) {
+void addLable  (long pos, const char* name,bool findErrors) {
     bool isExist = false;
 
     for (int i = 0; i < lablecnt; i++) {
         if (strcmp(Lables[i].name, name)) {
             if (pos != Lables[i].pos) {
-                error(0, "double defenitive lable", name);
+                error(numstr, "double defenitive lable", name);
             }
             return;
         }
@@ -47,7 +50,7 @@ void addLable  (long pos, const char* name) {
     lablecnt++;
 }
 
-void ReadCode (const char* readfile, String** code, size_t* strcnt) {
+void readCode (const char* readfile, String** code, size_t* strcnt) {
     *strcnt = 1;
     static char* text = ""; //this array will be exist
 
@@ -82,7 +85,7 @@ void ReadCode (const char* readfile, String** code, size_t* strcnt) {
     }
 }
 
-void getArgs (char** ip, char* pos) {
+void getArgs (char** ip, char* pos, bool findErrors) {
     char* ipbuf = *ip;
 
     char reg[20];
@@ -95,7 +98,7 @@ void getArgs (char** ip, char* pos) {
     buf1 = strchr(pos, '[');
     if (buf1) {
         buf2 = strchr(buf1, ']');
-        if (!buf2) error(0, "incorrect argument", "SYNTAX");
+        if (!buf2) error(numstr, "incorrect argument", "SYNTAX");
 
         *buf1 = ' ';
         if (buf2) *buf2 = ' ';
@@ -108,7 +111,7 @@ void getArgs (char** ip, char* pos) {
         if (!strcmp(reg, "RCX")) numreg = RCX;
         if (!strcmp(reg, "RDX")) numreg = RDX;
 
-        if (numreg == -1) error(0, "this is not a register", "SYNTAX");
+        if (numreg == -1) error(numstr, "this is not a register", "SYNTAX");
 
         *((short*)*ip - 1) |= (1 << REG_BIT);
         *((short*)*ip - 1) |= (1 << INU_BIT);
@@ -119,15 +122,15 @@ void getArgs (char** ip, char* pos) {
         *(double*)ipbuf = numbuf;
         ipbuf += sizeof(double);
     }
-    else if (sscanf(pos, " %s+ %s", lablech, reg) == 2) {
-        numbuf = (double)findLable(lablech);
+    else if (sscanf(pos, " %s+%s", lablech, reg) == 2) {
+        numbuf = (double)findLable(lablech, findErrors);
 
         if (!strcmp(reg, "RAX")) numreg = RAX;
         if (!strcmp(reg, "RBX")) numreg = RBX;
         if (!strcmp(reg, "RCX")) numreg = RCX;
         if (!strcmp(reg, "RDX")) numreg = RDX;
 
-        if (numreg == -1) error(0, "this is not a register", "SYNTAX");
+        if (numreg == -1) error(numstr, "this is not a register", "SYNTAX");
 
         *((short*)*ip - 1) |= (1 << REG_BIT);
         *((short*)*ip - 1) |= (1 << INU_BIT);
@@ -158,14 +161,14 @@ void getArgs (char** ip, char* pos) {
             *(char*)ipbuf = numreg;
             ipbuf += sizeof(char);
         } else {
-            numbuf = (double)findLable(lablech);
+            numbuf = (double)findLable(lablech, findErrors);
             *((short*)(*ip) - 1) |= (1 << INU_BIT);
 
             *(double*)ipbuf = numbuf;
             ipbuf += sizeof(double);
         }
     } else {
-        error(0, "incorrect argument", "SYNTAX");
+        error(numstr, "incorrect argument", "SYNTAX");
     }
     
     *ip = ipbuf;
@@ -178,44 +181,40 @@ void getArgs (char** ip, char* pos) {
 else if (strcmp(cmd, #_name) == 0) {                            \
     *(short*)ip = _num;                                         \
     ip += sizeof(short);                                        \
-    if (_arg) getArgs(&ip, strstr(code[i], cmd) + strlen(cmd));               \
+    if (_arg) getArgs(&ip, strstr(code[i], cmd) + strlen(cmd), findErrors);               \
 }
 
-void Compile (String* code, size_t strcnt, char* bincode) {
+void Compile (String* code, size_t strcnt, char* bincode, bool findErrors) {
     char* ip = bincode;
     char* ipbuf = ip;
 
-    for (size_t i = 0; i < strcnt; i++) { //////// make i global
+    for (size_t i = 0; i < strcnt; i++) {
         if (!code[i]) continue;
 
         char cmd[CMD_LEN] = "";
         sscanf(code[i], "%s", cmd);
 
-        //printf("%d/%d\t%s\n", i + 1, strcnt, cmd);
+        numstr = i;
 
         if (cmd[strlen(cmd) - 1] == ':') {
             char cmdbuf[CMD_LEN] = "";
             strncpy(cmdbuf, cmd, strlen(cmd) - 1);
-            addLable(ip - bincode, cmd);
+            addLable(ip - bincode, cmd, findErrors);
         }
         #include "comands.h"
         else {
             error(i, "no such command", "SYNTAX");
         }
-        printf("%p\n", ip);
+        //printf("%p\n", ip);
     }
 
-    //printf("COMPILATION COMPLICATED\n");
+    printf("COMPILATION COMPLICATED\n");
 }
 
 #undef DEF_CMD
 
-
-
-
-
-
-
-
-
-
+void printCode (const char* printFile, char* bincode, size_t ipcnt) {
+    FILE* fout = fopen(printFile, "w");
+    fwrite(bincode, sizeof(short) + sizeof(char) + sizeof(double), ipcnt, fout);
+    fclose(fout);
+}
