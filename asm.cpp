@@ -10,12 +10,18 @@
 #include "asm.h"
 #include "constants.h"
 
-#define error(_line, _mess, _type) if(!findErrors) printf("%s ERROR in line %ld: %s\n", _type, _line + 1, _mess)
+#define error(_line, _mess, _type) if(!findErrors) {                \
+    printf("%s ERROR in line %ld: %s\n", _type, _line + 1, _mess);  \
+    isRight = false;                                                \
+}
 
 #define CMD_LEN    50
 #define LABLE_SIZE 50
 #define LABLE_NUM  50
 
+const char listingfile[] = "listing.txt";
+
+bool isRight = true;
 size_t numstr = 0;
 
 typedef struct {
@@ -33,9 +39,7 @@ long findLable (const char* name, bool findErrors) {
     }
     return -1;
 }
-void addLable  (long pos, const char* name,bool findErrors) {
-    bool isExist = false;
-
+void addLable  (long pos, const char* name, bool findErrors) {
     for (int i = 0; i < lablecnt; i++) {
         if (strcmp(Lables[i].name, name)) {
             if (pos != Lables[i].pos) {
@@ -66,7 +70,7 @@ void readCode (const char* readfile, String** code, size_t* strcnt) {
     fread(text, sizeof(char), textlen, file);
     fclose(file);
     
-    for (int i = 0; i < strlen(text); i++) {
+    for (size_t i = 0; i < strlen(text); i++) {
         if (text[i] == '\0' || text[i] == '\n') {
             text[i] = '\n';
             (*strcnt)++;
@@ -186,9 +190,12 @@ else if (strcmp(cmd, #_name) == 0) {                            \
 
 void Compile (String* code, size_t strcnt, char* bincode, bool findErrors) {
     char* ip = bincode;
-    char* ipbuf = ip;
+    FILE* flisting = NULL;
+
+    if (findErrors) flisting = fopen(listingfile, "w");
 
     for (size_t i = 0; i < strcnt; i++) {
+        char* ipbuf = ip;
         if (!code[i]) continue;
 
         char cmd[CMD_LEN] = "";
@@ -205,15 +212,30 @@ void Compile (String* code, size_t strcnt, char* bincode, bool findErrors) {
         else {
             error(i, "no such command", "SYNTAX");
         }
-        //printf("%p\n", ip);
-    }
 
-    printf("COMPILATION COMPLICATED\n");
+        // LISTING
+        if (findErrors) {
+            fprintf(flisting, "%s\n\t", strstr(code[i], cmd)); 
+            for (int i = 0; i < ip - ipbuf; i++) {
+                fprintf(flisting, "%4.2x", *(char*)(ipbuf + i));
+            }
+            fprintf(flisting, "\n");            
+        } 
+    }
+    if (findErrors) fclose(flisting);
+    if (findErrors && isRight) printf("COMPILATION COMPLICATED\n");
 }
 
 #undef DEF_CMD
 
 void printCode (const char* printFile, char* bincode, size_t ipcnt) {
+    if (!isRight) {
+        FILE* flisting = fopen(listingfile, "w");
+        fclose(flisting);
+        printf("ERROR in compilatin\n");
+        return;
+    }
+
     FILE* fout = fopen(printFile, "w");
     fwrite(bincode, sizeof(short) + sizeof(char) + sizeof(double), ipcnt, fout);
     fclose(fout);

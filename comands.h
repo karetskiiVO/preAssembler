@@ -46,7 +46,7 @@ DEF_CMD(POP, 2, 1, {
         _arg += *(char*)(programm + ip);
         ip += sizeof(char);
 
-        regist[_arg] = POP;
+        regist[(int)round(_arg)] = POP;
     }
 })
 

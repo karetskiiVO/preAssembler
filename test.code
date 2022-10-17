@@ -1,6 +1,5 @@
 IN
 CALL function
-aboba
 PUSH 1
 OUT
 HLT
