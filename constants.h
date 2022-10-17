@@ -22,4 +22,4 @@ enum SPECIAL_BYTES {
     INU_BIT = 8
 };
 
-#endif
+#endif // constants.h

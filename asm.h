@@ -11,4 +11,4 @@ void readCode (const char* readfile, String** code, size_t* strcnt);
 
 void printCode (const char* printFile, char* bincode, size_t ipcnt);
 
-#endif
+#endif // asm.h

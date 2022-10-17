@@ -20,4 +20,4 @@ void  Push (Stack* stk, Elem_t elem);
 
 void Upload (char** chbuf, size_t* size, const char* filename);
 
-#endif
+#endif // cpu.h
