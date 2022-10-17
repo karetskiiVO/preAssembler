@@ -1,8 +1,12 @@
 IN
 CALL function
+aboba
+PUSH 1
 OUT
 HLT
 
 function:
-    PUSH 1
+    DMP
+    PUSH 3
+    OUT
 RET

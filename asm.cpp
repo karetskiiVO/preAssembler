@@ -10,7 +10,7 @@
 #include "asm.h"
 #include "constants.h"
 
-#define error(_line, _mess, _type) if(!findErrors) printf("%s ERROR in line %ld: %s\n", _type, _line, _mess)
+#define error(_line, _mess, _type) if(!findErrors) printf("%s ERROR in line %ld: %s\n", _type, _line + 1, _mess)
 
 #define CMD_LEN    50
 #define LABLE_SIZE 50

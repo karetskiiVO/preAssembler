@@ -203,11 +203,12 @@ DEF_CMD(CALL, 10, 1, {
     }
 
     if (_com & (1 << INU_BIT)) {
-        _arg += *(char*)(programm + ip);
-        ip += sizeof(char);
+        _arg += *(double*)(programm + ip);
+        ip += sizeof(double);
     }
 
     Push(&callstack, ip);
+    stackDump(callstack);
     ip = (int)round(_arg);
 })
 
