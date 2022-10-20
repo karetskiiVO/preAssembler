@@ -86,7 +86,7 @@ int stackPop_ (Stack* stk, Elem_t* pastElem) {
     CHECK(stk->errors, stk->marker1 == stk->marker2, LOSED_DATA);
 #endif
 
-    CHECK(stk->errors, !stk->size, STACK_OVERFLOW);
+    CHECK(stk->errors, stk->size, STACK_OVERFLOW);
     CHECK(stk->errors, pastElem != NULL, STACK_OVERFLOW);
     
     *pastElem = NAN;

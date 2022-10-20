@@ -8,7 +8,7 @@ DEF_CMD(PUSH, 1, 1, {
     ip += sizeof(short);
 
     if (_com & (1 << REG_BIT)) {
-        _arg += *(char*)(programm + ip);
+        _arg += regist[(int)*(char*)(programm + ip)];
         ip += sizeof(char);
     }
     if (_com & (1 << INU_BIT)) {
@@ -26,14 +26,10 @@ DEF_CMD(POP, 2, 1, {
     short _com = *(short*)(programm + ip);
     ip += sizeof(short);
 
-    if (_com & (1 << INU_BIT)) {
-        printf("Segmentation fault\n");
-        return 0;
-    }
     if (_com & (1 << MEM_BIT)) {
         double _arg = 0;
         if (_com & (1 << REG_BIT)) {
-            _arg += *(char*)(programm + ip);
+            _arg += regist[(int)*(char*)(programm + ip)];
             ip += sizeof(char);
         }
         if (_com & (1 << INU_BIT)) {
@@ -42,11 +38,14 @@ DEF_CMD(POP, 2, 1, {
         }
         RAM[(int)round(_arg)] = POP;
     } else if (_com & (1 << REG_BIT)) {
-        char _arg = -1;
+        char _arg = 0;
         _arg += *(char*)(programm + ip);
         ip += sizeof(char);
 
         regist[(int)round(_arg)] = POP;
+    } else if (_com & (1 << INU_BIT)) {
+        printf("Segmentation fault\n");
+        return 0;
     }
 })
 
@@ -56,7 +55,7 @@ DEF_CMD(JMP, 3, 1, {
     ip += sizeof(short);
 
     if (_com & (1 << REG_BIT)) {
-        _arg += *(char*)(programm + ip);
+        _arg += regist[(int)*(char*)(programm + ip)];
         ip += sizeof(char);
     }
     if (_com & (1 << INU_BIT)) {
@@ -76,7 +75,7 @@ DEF_CMD(JB, 4, 1, {
     ip += sizeof(short);
 
     if (_com & (1 << REG_BIT)) {
-        _arg += *(char*)(programm + ip);
+        _arg += regist[(int)*(char*)(programm + ip)];
         ip += sizeof(char);
     }
     if (_com & (1 << INU_BIT)) {
@@ -96,7 +95,7 @@ DEF_CMD(JBE, 5, 1, {
     ip += sizeof(short);
 
     if (_com & (1 << REG_BIT)) {
-        _arg += *(char*)(programm + ip);
+        _arg += regist[(int)*(char*)(programm + ip)];
         ip += sizeof(char);
     }
     if (_com & (1 << INU_BIT)) {
@@ -116,7 +115,7 @@ DEF_CMD(JA, 6, 1, {
     ip += sizeof(short);
 
     if (_com & (1 << REG_BIT)) {
-        _arg += *(char*)(programm + ip);
+        _arg += regist[(int)*(char*)(programm + ip)];
         ip += sizeof(char);
     }
     if (_com & (1 << INU_BIT)) {
@@ -136,7 +135,7 @@ DEF_CMD(JAE, 7, 1, {
     ip += sizeof(short);
 
     if (_com & (1 << REG_BIT)) {
-        _arg += *(char*)(programm + ip);
+        _arg += regist[(int)*(char*)(programm + ip)];
         ip += sizeof(char);
     }
     if (_com & (1 << INU_BIT)) {
@@ -156,7 +155,7 @@ DEF_CMD(JE, 8, 1, {
     ip += sizeof(short);
 
     if (_com & (1 << REG_BIT)) {
-        _arg += *(char*)(programm + ip);
+        _arg += regist[(int)*(char*)(programm + ip)];
         ip += sizeof(char);
     }
     if (_com & (1 << INU_BIT)) {
@@ -167,7 +166,9 @@ DEF_CMD(JE, 8, 1, {
         _arg = RAM[(int)round(_arg)];
     }
 
-    if (fabs(-POP + POP) < (1e-9)) ip = (int)round(_arg);
+    if (fabs(-POP + POP) < (1e-9)) {
+        ip = (int)round(_arg);
+    }
 })
 
 DEF_CMD(JNE, 9, 1, {       
@@ -176,7 +177,7 @@ DEF_CMD(JNE, 9, 1, {
     ip += sizeof(short);
 
     if (_com & (1 << REG_BIT)) {
-        _arg += *(char*)(programm + ip);
+        _arg += regist[(int)*(char*)(programm + ip)];
         ip += sizeof(char);
     }
     if (_com & (1 << INU_BIT)) {
@@ -187,7 +188,9 @@ DEF_CMD(JNE, 9, 1, {
         _arg = RAM[(int)round(_arg)];
     }
 
-    if (fabs(-POP + POP) > (1e-9)) ip = (int)round(_arg);
+    if (fabs(- POP + POP) > (1e-9)) {
+        ip = (int)round(_arg);
+    }
 })
 
 DEF_CMD(CALL, 10, 1, { 
@@ -208,17 +211,17 @@ DEF_CMD(CALL, 10, 1, {
     }
 
     Push(&callstack, ip);
-    stackDump(callstack);
+    //stackDump(callstack);
     ip = (int)round(_arg);
 })
 
 DEF_CMD(RET, 12, 0, {
-    ip = round(Pop(&callstack));
+    ip = (int)round(Pop(&callstack));
 })
 
 DEF_CMD(DMP, 13, 0, {
     ip += sizeof(short);
-    DMP;
+    CPU_DMP;
 })
 
 DEF_CMD(IN, 14, 0, {
@@ -255,8 +258,10 @@ DEF_CMD(DIV, 18, 0, {
 })
 
 DEF_CMD(SUB, 19, 0, {
-    ip += sizeof(short);          
-    PUSH(- POP + POP);
+    ip += sizeof(short);
+    double a_ = POP;
+    double b_ = POP;          
+    PUSH(b_ - a_);
 })
 
 DEF_CMD(DUP, 20, 0, {   

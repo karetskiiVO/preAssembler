@@ -33,7 +33,7 @@ lable Lables[LABLE_NUM] = {0};
 
 long findLable (const char* name, bool findErrors) {
     for (int i = 0; i < lablecnt; i++) {
-        if (strcmp(Lables[i].name, name)) {
+        if (strcmp(Lables[i].name, name) == 0) {   
             return Lables[i].pos;
         }
     }
@@ -41,7 +41,7 @@ long findLable (const char* name, bool findErrors) {
 }
 void addLable  (long pos, const char* name, bool findErrors) {
     for (int i = 0; i < lablecnt; i++) {
-        if (strcmp(Lables[i].name, name)) {
+        if (!strcmp(Lables[i].name, name)) {
             if (pos != Lables[i].pos) {
                 error(numstr, "double defenitive lable", name);
             }
@@ -49,7 +49,7 @@ void addLable  (long pos, const char* name, bool findErrors) {
         }
     }
 
-    strcpy(Lables[lablecnt].name, name);
+    strncpy(Lables[lablecnt].name, name, strlen(name) - 1);
     Lables[lablecnt].pos = pos;
     lablecnt++;
 }
@@ -151,7 +151,7 @@ void getArgs (char** ip, char* pos, bool findErrors) {
         *(double*)ipbuf = numbuf;
         ipbuf += sizeof(double);
     } 
-    else if (sscanf(pos, " %s"), lablech) {
+    else if (sscanf(pos, " %s", lablech)) {
         strcpy(reg, lablech);
 
         if (!strcmp(reg, "RAX")) numreg = RAX;

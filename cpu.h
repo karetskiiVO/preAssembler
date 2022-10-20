@@ -12,7 +12,7 @@ stackCtor(callstack, 0);
 
 #define PUSH(_elem) Push(&mainstack, (_elem))
 #define POP Pop(&mainstack)
-#define DMP stackDump(mainstack);
+#define CPU_DMP stackDump(mainstack);                  
 
 double Pop (Stack* stk);
 
