@@ -280,3 +280,26 @@ DEF_CMD(SQRT, 21, 0, {
     }
     PUSH(sqrt(_buf));
 })
+
+DEF_CMD(SIN, 22, 0, {    
+    ip += sizeof(short);      
+    double _buf = POP;
+    PUSH(sin(_buf));
+})
+
+DEF_CMD(COS, 23, 0, {    
+    ip += sizeof(short);      
+    double _buf = POP;
+    PUSH(cos(_buf));
+})
+
+DEF_CMD(WM, 24, 0, {    
+    ip += sizeof(short);
+    for (int _i = 0; _i < RAM_SIZE; _i++) {
+        if (fabs(RAM[_i]) < 1e-9) {
+            printf(".");
+        } else {
+            printf("*");
+        }
+    }
+})

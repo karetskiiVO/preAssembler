@@ -40,8 +40,11 @@ long findLable (const char* name, bool findErrors) {
     return -1;
 }
 void addLable  (long pos, const char* name, bool findErrors) {
+    char _buf[LABLE_SIZE] = {0};
+    strncpy(_buf, name, strlen(name) - 1);
+
     for (int i = 0; i < lablecnt; i++) {
-        if (!strcmp(Lables[i].name, name)) {
+        if (!strcmp(Lables[i].name, _buf)) {
             if (pos != Lables[i].pos) {
                 error(numstr, "double defenitive lable", name);
             }
@@ -49,7 +52,7 @@ void addLable  (long pos, const char* name, bool findErrors) {
         }
     }
 
-    strncpy(Lables[lablecnt].name, name, strlen(name) - 1);
+    strcpy(Lables[lablecnt].name, _buf);
     Lables[lablecnt].pos = pos;
     lablecnt++;
 }
@@ -210,7 +213,7 @@ void Compile (String* code, size_t strcnt, char* bincode, bool findErrors) {
         }
         #include "comands.h"
         else {
-            error(i, "no such command", "SYNTAX");
+            if (strtok(cmd, "\t ")) error(i, "no such command", "SYNTAX");
         }
 
         // LISTING

@@ -4,11 +4,13 @@
 #include <stdio.h>
 #include <math.h>
 
+// 120 * 30
+
 #define mask (((short)1 << (sizeof(char) * 8)) - 1)
-const size_t RAM_SIZE = 256;
+const size_t RAM_SIZE = 3600;
 
 double regist[5] = {0};
-double RAM[256];
+double RAM[RAM_SIZE];
 
 #define DEF_CMD(_name, _num, _arg, ...) \
     case (_num):                        \
