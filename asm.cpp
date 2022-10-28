@@ -72,6 +72,8 @@ void readCode (const char* readfile, String** code, size_t* strcnt) {
 
     fread(text, sizeof(char), textlen, file);
     fclose(file);
+
+    //// find comments and empty strings
     
     for (size_t i = 0; i < strlen(text); i++) {
         if (text[i] == '\0' || text[i] == '\n') {
