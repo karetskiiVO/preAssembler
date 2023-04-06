@@ -39,6 +39,7 @@ long findLable (const char* name, bool findErrors) {
     }
     return -1;
 }
+
 void addLable  (long pos, const char* name, bool findErrors) {
     char _buf[LABLE_SIZE] = {0};
     strncpy(_buf, name, strlen(name) - 1);
