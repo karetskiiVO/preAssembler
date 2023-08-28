@@ -8,8 +8,6 @@
 #include <iostream>
 #include <exception>
 
-typedef long long memoryCell;
-
 namespace formalLanguage {
 const size_t npos = (size_t)(-1);
 
@@ -18,19 +16,18 @@ struct lexem : public std::string {
     lexem (const std::string& content, const size_t pos);
 };
 
-class compilerError {
-    std::vector<lexem>* line;
-    std::string errorMsg;
+struct compilerError {
     size_t pos;
     size_t lineNo;
+    std::string errorMsg;
+    const std::string* line;
 
-public:
     static const size_t undefLineNo = (size_t)-1;
 
-    compilerError (std::vector<lexem>& line, const std::string& errorMsg = "Something went wrong",
-                   size_t pos = 0, size_t lineNo = undefLineNo) {
+    compilerError (const std::string& errorMsg = "Something went wrong", size_t pos = 0,
+                   size_t lineNo = undefLineNo, std::string* line = nullptr) {
         this->pos      = pos;
-        this->line     = &line;
+        this->line     = line;
         this->lineNo   = lineNo;
         this->errorMsg = errorMsg;
     }
@@ -47,16 +44,19 @@ public:
 };
 
 class binary {
-    std::vector<memoryCell> code;
+    std::vector<size_t> code;
     size_t carriagePos;
 
 public:
     binary ();
 
     void setCarrigePos ();
-    void addMCell (memoryCell cell);
     void setCarrigePos (size_t newPos);
-    memoryCell& operator[] (size_t idx);
+    size_t getCarrigePos ();
+
+    size_t& operator[] (size_t idx);
+
+    void addMCell (size_t cell);
 };
 
 class code {
@@ -86,16 +86,29 @@ private:
 };
 
 class myasmCode : public code {
+    struct lable : std::string {
+        size_t addres;
+        std::vector<size_t> lableAddress;
+    };
+
 public:
     void compile ();
     void print ();
 private:
-    size_t tryGetSize  (std::vector<lexem>& line, size_t& pos);
-    void  getArgument  (std::vector<lexem>& line, size_t& pos);
-    void  getComand    (std::vector<lexem>& line, size_t& pos);
-    void  compileLine  (std::vector<lexem>& line, size_t& pos);
-    void  getDirective (std::vector<lexem>& line, size_t& pos);
-    void  getLexem     (std::vector<lexem>& line, size_t& pos, std::string& lex);
+    std::vector<lable> lableTable;
+
+    void getCommand   (std::vector<lexem>& line, size_t& pos);
+    void compileLine  (std::vector<lexem>& line, size_t& pos);
+    //void getDirective (std::vector<lexem>& line, size_t& pos);
+    void tryGetMemory (std::vector<lexem>& line, size_t& pos, size_t& command);
+    void tryGetReg    (std::vector<lexem>& line, size_t& pos, size_t& command);
+    void trtGetCnst   (std::vector<lexem>& line, size_t& pos, size_t& command);
+    void tryGetLable  (std::vector<lexem>& line, size_t& pos, size_t& command);
+    void tryGetRegFac (std::vector<lexem>& line, size_t& pos, size_t& command);
+
+    void tryGetSize   (std::vector<lexem>& line, size_t& pos, size_t& command);
+    void getArgument  (std::vector<lexem>& line, size_t& pos, size_t& command);
+    void getLexem     (std::vector<lexem>& line, size_t& pos, const std::string& lex);    
 };
 }
 

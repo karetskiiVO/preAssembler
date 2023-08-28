@@ -22,11 +22,15 @@ void binary::setCarrigePos (size_t newPos) {
     carriagePos = newPos;
 }
 
-memoryCell& binary::operator[] (size_t idx) {
+size_t& binary::operator[] (size_t idx) {
     return code[idx];
 }
 
-void binary::addMCell (memoryCell cell) {
+size_t binary::getCarrigePos () {
+    return carriagePos;
+}
+
+void binary::addMCell (size_t cell) {
     if (carriagePos > code.size()) code.resize(carriagePos);
 
     if (carriagePos == code.size()) {

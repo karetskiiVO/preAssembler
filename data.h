@@ -9,7 +9,7 @@ namespace machinVariables {
         "rax", "rbx", "rcx", "rdx", "rsp", "rip", "rsi", "rdi",
          "r8",  "r9", "r10", "r11", "r12", "r13", "r14", "r15",
     };
-    const std::vector<std::string> comandNames    = {
+    const std::vector<std::string> commandNames    = {
         "hlt", "syscall",    "jmp",   "call",    "ret",   "mov",
         "add",     "sub",    "mul",    "div",   "fadd",  "fsub",   "fmul",   "fdiv"
         "push",   "pop",     "cmp",     "je",    "jne",    "jl",    "jle",    "jg",   "jge",
@@ -20,7 +20,7 @@ namespace machinVariables {
         ".org", ".include", ".long", ".float", ".byte", ".int", ".short"
     };
 
-    const std::vector<std::string> comandSizeNames = {
+    const std::vector<std::string> commandSizeNames = {
         "byte", "word", "dword", "qword"
     };
 
@@ -31,33 +31,33 @@ namespace machinVariables {
     const size_t  BYTEMASK = 0xFF;
     const size_t DBYTEMASK = 0xFFFF;
 
-    const inline size_t getShift      (const size_t comand) {
-        return (comand >> 56) &  BYTEMASK;
+    const inline size_t getShift       (const size_t command) {
+        return (command >> 56) &  BYTEMASK;
     }
-    const inline size_t getFstArg     (const size_t comand) {
-        return (comand >> 16) & DBYTEMASK;
+    const inline size_t getFstArg      (const size_t command) {
+        return (command >> 16) & DBYTEMASK;
     }
-    const inline size_t getSndArg     (const size_t comand) {
-        return (comand >> 32) & DBYTEMASK;
+    const inline size_t getSndArg      (const size_t command) {
+        return (command >> 32) & DBYTEMASK;
     }
-    const inline size_t getComandSize (const size_t comand) {
-        return (comand >>  8) &  BYTEMASK;
-    }
-
-    void inline setShift      (size_t& comand, size_t newShift) {
-        comand = (comand & ~( BYTEMASK << 56)) | ((newShift & BYTEMASK) << 56);
-    }
-    void inline setFstArg     (size_t& comand, size_t fstArgType) {
-        comand = (comand & ~(DBYTEMASK << 16)) | ((fstArgType & DBYTEMASK) << 16);
-    }
-    void inline setSndArg     (size_t& comand, size_t sndArgType) {
-        comand = (comand & ~(DBYTEMASK << 32)) | ((sndArgType & DBYTEMASK) << 32);
-    }
-    void inline setComandSize (size_t& comand, size_t size) {
-        comand = (comand & ~( BYTEMASK <<  8)) | ((size & BYTEMASK) << 8);
+    const inline size_t getCommandSize (const size_t command) {
+        return (command >> 48) &  BYTEMASK;
     }
 
-    enum comandSize {
+    void inline setShift       (size_t& command, size_t newShift) {
+        command = (command & ~( BYTEMASK << 56)) | ((newShift & BYTEMASK) << 56);
+    }
+    void inline setFstArg      (size_t& command, size_t fstArgType) {
+        command = (command & ~(DBYTEMASK << 16)) | ((fstArgType & DBYTEMASK) << 16);
+    }
+    void inline setSndArg      (size_t& command, size_t sndArgType) {
+        command = (command & ~(DBYTEMASK << 32)) | ((sndArgType & DBYTEMASK) << 32);
+    }
+    void inline setCommandSize (size_t& command, size_t size) {
+        command = (command & ~( BYTEMASK << 48)) | ((size & BYTEMASK) << 48);
+    }
+
+    enum commandSize {
          Byte = 0,
          Word = 1,
         Dword = 2,
@@ -65,9 +65,9 @@ namespace machinVariables {
     };
 
     enum argtype {
-        mem = 0,
-        reg = 1,
-        cst = 2,
+        mem = 0001,
+        reg = 0010,
+        cst = 0100,
     };
 
     enum directives {
@@ -99,7 +99,7 @@ namespace machinVariables {
         r15 = 15,
     };
 
-    enum comands {
+    enum commands {
          syscall = 0,
              hlt = 1,
              jmp = 2,
